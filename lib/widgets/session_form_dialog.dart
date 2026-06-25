@@ -1,14 +1,16 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../models/scan_session.dart';
 
 class SessionFormDialog extends StatefulWidget {
   const SessionFormDialog({
     this.initialSession,
+    this.suggestedRound,
     super.key,
   });
 
   final ScanSession? initialSession;
+  final String? suggestedRound;
 
   @override
   State<SessionFormDialog> createState() => _SessionFormDialogState();
@@ -27,7 +29,7 @@ class _SessionFormDialogState extends State<SessionFormDialog> {
     super.initState();
     final session = widget.initialSession;
     _scannerNameController = TextEditingController(text: session?.scannerName ?? '');
-    _exportRoundController = TextEditingController(text: session?.exportRound ?? '');
+    _exportRoundController = TextEditingController(text: session?.exportRound ?? widget.suggestedRound ?? '');
     _carrierController = TextEditingController(text: session?.carrier ?? '');
     _driverNameController = TextEditingController(text: session?.driverName ?? '');
     _vehiclePlateController = TextEditingController(text: session?.vehiclePlate ?? '');

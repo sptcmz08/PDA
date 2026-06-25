@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -235,7 +235,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     try {
       final result = await _scannerService.process(cleaned, sessionId: session!.id!);
       await _alertService.play(result.status);
-      final count = await _repository.countAll();
+      final count = await _repository.countBySession(session.id!);
 
       if (!mounted) {
         return;
@@ -270,8 +270,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   Future<void> _loadInitialState() async {
     try {
-      final count = await _repository.countAll();
       final session = await _repository.getLatestSession();
+      final count = session != null ? await _repository.countBySession(session.id!) : 0;
       if (mounted) {
         setState(() {
           _count = count;
@@ -300,10 +300,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
     _isSessionDialogOpen = true;
     try {
       final currentSession = _session;
+      final sessionsToday = currentSession == null ? await _repository.countSessionsToday() : 0;
+      final suggestedRound = currentSession == null ? (sessionsToday + 1).toString() : null;
+
       final nextSession = await showDialog<ScanSession>(
         context: context,
         barrierDismissible: currentSession != null,
-        builder: (context) => SessionFormDialog(initialSession: currentSession),
+        builder: (context) => SessionFormDialog(
+          initialSession: currentSession,
+          suggestedRound: suggestedRound,
+        ),
       );
       if (nextSession == null) {
         _requestScannerFocus();
@@ -349,7 +355,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Future<void> _openHistory() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => HistoryScreen(repository: _repository),
+        builder: (context) => HistoryScreen(
+          repository: _repository,
+          sessionId: _session?.id,
+        ),
       ),
     );
     _requestScannerFocus();
@@ -422,7 +431,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
 
     try {
-      await _repository.clearAll();
+      await _repository.clearOldData();
       if (!mounted) {
         return;
       }

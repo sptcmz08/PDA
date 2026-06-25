@@ -1,4 +1,4 @@
-﻿import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../core/constants.dart';
 import '../database/sqlite_helper.dart';
@@ -71,32 +71,42 @@ class TrackingRepository {
     return TrackingLog.fromMap(rows.first);
   }
 
-  Future<List<TrackingLog>> getAll({bool newestFirst = true}) async {
+  Future<List<TrackingLog>> getAllBySession(int sessionId, {bool newestFirst = true}) async {
     final database = await _sqliteHelper.database;
     final rows = await database.query(
       AppConstants.trackingTable,
+      where: 'session_id = ?',
+      whereArgs: [sessionId],
       orderBy: 'scanned_at ${newestFirst ? 'DESC' : 'ASC'}',
     );
     return rows.map(TrackingLog.fromMap).toList();
   }
 
-  Future<int> countAll() async {
+  Future<int> countBySession(int sessionId) async {
     final database = await _sqliteHelper.database;
     final result = await database.rawQuery(
-      'SELECT COUNT(*) AS count FROM ${AppConstants.trackingTable}',
+      'SELECT COUNT(*) AS count FROM ${AppConstants.trackingTable} WHERE session_id = ?',
+      [sessionId],
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  Future<void> clearAll() async {
+  Future<int> countSessionsToday() async {
+    final database = await _sqliteHelper.database;
+    final result = await database.rawQuery(
+      "SELECT COUNT(*) AS count FROM ${AppConstants.sessionTable} WHERE date(created_at) = date('now', 'localtime')"
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<void> clearOldData() async {
     final database = await _sqliteHelper.database;
     await database.transaction((transaction) async {
-      await transaction.delete(AppConstants.trackingTable);
-      await transaction.delete(AppConstants.sessionTable);
-      await transaction.delete(
-        'sqlite_sequence',
-        where: 'name IN (?, ?)',
-        whereArgs: [AppConstants.trackingTable, AppConstants.sessionTable],
+      await transaction.rawDelete(
+        "DELETE FROM ${AppConstants.trackingTable} WHERE date(scanned_at) < date('now', 'localtime')"
+      );
+      await transaction.rawDelete(
+        "DELETE FROM ${AppConstants.sessionTable} WHERE date(created_at) < date('now', 'localtime')"
       );
     });
   }

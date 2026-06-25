@@ -32,7 +32,7 @@ class ExportService {
       throw const NoExportSessionException();
     }
 
-    final logs = await _repository.getAll(newestFirst: false);
+    final logs = await _repository.getAllBySession(session.id!, newestFirst: false);
     if (logs.isEmpty) {
       throw const NoExportDataException();
     }

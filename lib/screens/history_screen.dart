@@ -7,10 +7,12 @@ import '../repositories/tracking_repository.dart';
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({
     required this.repository,
+    this.sessionId,
     super.key,
   });
 
   final TrackingRepository repository;
+  final int? sessionId;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class HistoryScreen extends StatelessWidget {
         title: const Text('ประวัติการสแกน'),
       ),
       body: FutureBuilder<List<TrackingLog>>(
-        future: repository.getAll(),
+        future: sessionId != null ? repository.getAllBySession(sessionId!) : Future.value([]),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
