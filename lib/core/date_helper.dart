@@ -7,6 +7,7 @@ class DateHelper {
   static final _dateFormat = DateFormat('dd/MM/yyyy');
   static final _timeFormat = DateFormat('HH:mm:ss');
   static final _fileFormat = DateFormat('yyyy-MM-dd_HH-mm');
+  static final _yyMMddFormat = DateFormat('yyMMdd');
 
   static String formatDateTime(DateTime value) {
     return _dateTimeFormat.format(value);
@@ -22,5 +23,9 @@ class DateHelper {
 
   static String formatCsvFileTimestamp(DateTime value) {
     return _fileFormat.format(value);
+  }
+
+  static String formatYyMMdd(DateTime value) {
+    return _yyMMddFormat.format(value);
   }
 }

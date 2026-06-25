@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
@@ -45,7 +45,15 @@ class ExportService {
 
       final bytes = workbook.saveAsStream();
       final now = DateTime.now();
-      final fileName = 'PDA_SCAN_REPORT_${DateHelper.formatCsvFileTimestamp(now)}.xlsx';
+      
+      // Format date as YYMMDD
+      final dateStr = DateHelper.formatYyMMdd(now);
+      
+      // Clean and pad the export round
+      final rawRound = session.exportRound.replaceAll(RegExp(r'[^0-9]'), '');
+      final roundStr = rawRound.isEmpty ? '01' : rawRound.padLeft(2, '0');
+      
+      final fileName = 'VIP_${dateStr}_R${roundStr}_${logs.length}.xlsx';
       return FileHelper.createBinaryDocumentFile(fileName: fileName, bytes: bytes);
     } finally {
       workbook.dispose();
