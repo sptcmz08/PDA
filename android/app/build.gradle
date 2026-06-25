@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.pda_tracking_scanner"
-        minSdk = flutter.minSdkVersion
+        minSdk = 14
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
